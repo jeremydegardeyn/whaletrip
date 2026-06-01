@@ -24,6 +24,6 @@ output "bigquery_dataset" {
 }
 
 output "dns_cname_instruction" {
-  description = "DNS CNAME record to add for whaletrip.datadinosaur.com"
-  value       = "Add CNAME: whaletrip.datadinosaur.com → ${trimprefix(google_cloud_run_v2_service.api.uri, "https://")}"
+  description = "DNS CNAME record to add for whtrp.datadinosaur.com"
+  value       = "Add CNAME: whtrp.datadinosaur.com → ${trimprefix(google_cloud_run_v2_service.api.uri, "https://")}"
 }

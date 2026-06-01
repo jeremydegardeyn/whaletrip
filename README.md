@@ -107,7 +107,7 @@ npm run dev
 
 ## Domain Setup
 
-Point `whaletrip.datadinosaur.com` to your Cloud Run URL via DNS CNAME, or to your GCE VM IP via A record. See `docs/deployment.md` for full instructions.
+Point `whtrp.datadinosaur.com` to your Cloud Run URL via DNS CNAME, or to your GCE VM IP via A record. See `docs/deployment.md` for full instructions.
 
 ## Environment Variables
 

@@ -57,7 +57,7 @@ terraform output dns_cname_instruction
 
 Add the shown CNAME record to your DNS:
 ```
-whaletrip.datadinosaur.com  CNAME  <cloud-run-url>.run.app
+whtrp.datadinosaur.com  CNAME  <cloud-run-url>.run.app
 ```
 
 Or map to an A record if using GCE VM (get IP from `gcloud compute instances describe`).

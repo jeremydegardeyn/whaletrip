@@ -1,10 +1,10 @@
 #!/bin/bash
 # Run this ONCE on the GCE VM to provision Let's Encrypt SSL certificate.
-# Prerequisites: DNS A record for whaletrip.datadinosaur.com → this VM's public IP.
+# Prerequisites: DNS A record for whtrp.datadinosaur.com → this VM's public IP.
 
 set -euo pipefail
 
-DOMAIN=whaletrip.datadinosaur.com
+DOMAIN=whtrp.datadinosaur.com
 EMAIL=your-email@datadinosaur.com  # <-- change this
 
 echo "Provisioning SSL certificate for $DOMAIN"

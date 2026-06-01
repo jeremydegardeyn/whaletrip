@@ -30,7 +30,7 @@ variable "agents_image" {
 variable "allowed_origins" {
   description = "Comma-separated CORS origins"
   type        = string
-  default     = "https://whaletrip.datadinosaur.com"
+  default     = "https://whtrp.datadinosaur.com"
 }
 
 variable "gemini_model" {

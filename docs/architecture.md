@@ -4,7 +4,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     whaletrip.datadinosaur.com                      │
+│                     whtrp.datadinosaur.com                      │
 │                    (Firebase Hosting / NGINX)                       │
 │                                                                     │
 │   ┌───────────────────────────────────────────────────────────┐    │
@@ -102,7 +102,7 @@ bigquery-public-data.gbif.occurrences
 - Good for full control and local dev parity
 
 ### Option C — Cloud Run + Custom Domain
-- Cloud Run domain mapping for `whaletrip.datadinosaur.com`
+- Cloud Run domain mapping for `whtrp.datadinosaur.com`
 - Google manages TLS automatically
 - DNS: CNAME → ghs.googlehosted.com
 
