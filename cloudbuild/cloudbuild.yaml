@@ -87,7 +87,7 @@ steps:
 
 
 substitutions:
-  _PROJECT_ID: ''
+  _PROJECT_ID: 'strongsville-city-schools'
   _REGION: 'us-central1'
   _TAG: 'latest'
 
