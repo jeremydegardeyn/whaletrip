@@ -115,7 +115,7 @@ resource "google_cloud_run_v2_service" "api" {
     }
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/whaletrip/api:latest"
+      image = var.api_image != "gcr.io/google-samples/hello-app:1.0" ? var.api_image : "us-docker.pkg.dev/cloudrun/container/hello:latest"
 
       resources {
         limits = { cpu = "1", memory = "512Mi" }
@@ -164,7 +164,7 @@ resource "google_cloud_run_v2_service" "agents" {
     }
 
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/whaletrip/agents:latest"
+      image = var.agents_image != "gcr.io/google-samples/hello-app:1.0" ? var.agents_image : "us-docker.pkg.dev/cloudrun/container/hello:latest"
 
       resources {
         limits   = { cpu = "2", memory = "1Gi" }
@@ -210,4 +210,10 @@ resource "google_firestore_database" "default" {
   location_id = "nam5"
   type        = "FIRESTORE_NATIVE"
   depends_on  = [google_project_service.services]
+
+  lifecycle {
+    prevent_destroy = true
+    # If database already exists, import it:
+    # terraform import google_firestore_database.default YOUR_PROJECT_ID/(default)
+  }
 }
