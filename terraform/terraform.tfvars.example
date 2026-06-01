@@ -1,0 +1,5 @@
+project_id      = "your-gcp-project-id"
+region          = "us-central1"
+bq_location     = "US"
+allowed_origins = "https://whaletrip.datadinosaur.com"
+gemini_model    = "gemini-1.5-flash-001"

@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background: #082f49;
+  color: white;
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(8, 47, 73, 0.9) !important;
+  border: 1px solid rgba(3, 105, 161, 0.5) !important;
+}
+
+.maplibregl-ctrl-group button {
+  color: #7dd3fc !important;
+}
+
+.maplibregl-ctrl-attrib {
+  display: none !important;
+}

@@ -1,0 +1,81 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    image: whaletrip-api:local
+    restart: unless-stopped
+    environment:
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - GCP_REGION=${GCP_REGION:-us-central1}
+      - BQ_DATASET=${BQ_DATASET:-whaletrip}
+      - AGENTS_URL=http://agents:8001
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://whaletrip.datadinosaur.com}
+      - API_SECRET_KEY=${API_SECRET_KEY}
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS:-/dev/null}:/app/service-account.json:ro
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/service-account.json
+    ports:
+      - "8000:8000"
+    depends_on:
+      agents:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  agents:
+    build:
+      context: ./services/agents
+      dockerfile: Dockerfile
+    image: whaletrip-agents:local
+    restart: unless-stopped
+    environment:
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - VERTEX_AI_LOCATION=${GCP_REGION:-us-central1}
+      - BQ_DATASET=${BQ_DATASET:-whaletrip}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash-001}
+      - ALLOWED_ORIGINS=http://api:8000
+    volumes:
+      - ${GOOGLE_APPLICATION_CREDENTIALS:-/dev/null}:/app/service-account.json:ro
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/service-account.json
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/whaletrip.conf:/etc/nginx/conf.d/whaletrip.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot-www:/var/www/certbot:ro
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 60s
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done"
+
+volumes:
+  certbot-www:
