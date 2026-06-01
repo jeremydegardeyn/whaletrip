@@ -22,3 +22,7 @@ coverage/
 htmlcov/
 service-account-key.json
 *-key.json
+
+# Firebase
+.firebase/
+

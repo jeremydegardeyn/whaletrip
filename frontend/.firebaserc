@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "strongsville-city-schools"
+  },
+  "targets": {
+    "strongsville-city-schools": {
+      "hosting": {
+        "whtrp": ["whtrp"]
+      }
+    }
   }
 }

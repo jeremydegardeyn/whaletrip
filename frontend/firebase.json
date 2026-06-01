@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "whtrp",
     "public": "out",
     "cleanUrls": true,
     "trailingSlash": false,
