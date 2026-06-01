@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import time
+import hashlib
+import json
 import structlog
 from google.cloud import bigquery
 from google.cloud.bigquery import QueryJobConfig, ScalarQueryParameter, ArrayQueryParameter
@@ -15,12 +18,44 @@ from app.models.whale import (
 logger = structlog.get_logger()
 settings = get_settings()
 
+# ── Simple TTL cache (no extra dependencies) ───────────────────────────────────
+# Keyed by a hash of the query inputs. Entries expire after TTL_SECONDS.
+# For a multi-instance deployment swap this for Redis/Memorystore.
+_CACHE: dict[str, tuple[float, object]] = {}
+TTL_SECONDS = 3600  # 1 hour — GBIF data doesn't change intraday
+
+
+def _cache_key(*args) -> str:
+    return hashlib.md5(json.dumps(args, sort_keys=True, default=str).encode()).hexdigest()
+
+
+def _cache_get(key: str):
+    entry = _CACHE.get(key)
+    if entry and time.time() - entry[0] < TTL_SECONDS:
+        return entry[1]
+    return None
+
+
+def _cache_set(key: str, value) -> None:
+    _CACHE[key] = (time.time(), value)
+    # Evict entries older than TTL to keep memory bounded
+    now = time.time()
+    expired = [k for k, (ts, _) in _CACHE.items() if now - ts >= TTL_SECONDS]
+    for k in expired:
+        del _CACHE[k]
+
 
 def _get_client() -> bigquery.Client:
     return bigquery.Client(project=settings.gcp_project_id)
 
 
 def get_sightings(f: SightingsFilter) -> tuple[list[WhaleSighting], int]:
+    key = _cache_key("sightings", f.dict())
+    cached = _cache_get(key)
+    if cached is not None:
+        logger.info("sightings_cache_hit")
+        return cached  # type: ignore[return-value]
+
     client = _get_client()
 
     conditions: list[str] = []
@@ -87,10 +122,18 @@ def get_sightings(f: SightingsFilter) -> tuple[list[WhaleSighting], int]:
     total = list(client.query(count_query, count_job).result())[0].total
 
     logger.info("sightings_query", count=len(sightings), total=total)
-    return sightings, total
+    result = (sightings, total)
+    _cache_set(key, result)
+    return result
 
 
 def get_heatmap(month: int | None, species: str | None) -> list[HeatmapCell]:
+    key = _cache_key("heatmap", month, species)
+    cached = _cache_get(key)
+    if cached is not None:
+        logger.info("heatmap_cache_hit")
+        return cached  # type: ignore[return-value]
+
     client = _get_client()
     conditions = []
     params = []
@@ -116,10 +159,19 @@ def get_heatmap(month: int | None, species: str | None) -> list[HeatmapCell]:
     """
     job_config = QueryJobConfig(query_parameters=params)
     rows = list(client.query(query, job_config=job_config).result())
-    return [HeatmapCell(**dict(row.items())) for row in rows]
+    result = [HeatmapCell(**dict(row.items())) for row in rows]
+    logger.info("heatmap_query", count=len(result))
+    _cache_set(key, result)
+    return result
 
 
 def get_species_list() -> list[SpeciesSummary]:
+    key = _cache_key("species_list")
+    cached = _cache_get(key)
+    if cached is not None:
+        logger.info("species_list_cache_hit")
+        return cached  # type: ignore[return-value]
+
     client = _get_client()
     query = f"""
         SELECT
@@ -131,7 +183,10 @@ def get_species_list() -> list[SpeciesSummary]:
         LIMIT 200
     """
     rows = list(client.query(query).result())
-    return [SpeciesSummary(**dict(row.items())) for row in rows]
+    result = [SpeciesSummary(**dict(row.items())) for row in rows]
+    logger.info("species_list_query", count=len(result))
+    _cache_set(key, result)
+    return result
 
 
 def query_agent_context(
