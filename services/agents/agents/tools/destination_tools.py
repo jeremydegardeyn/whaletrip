@@ -97,8 +97,8 @@ _DESTINATIONS: dict[str, dict] = {
 
 def get_destination_info(
     destination: str,
-    interests: list[str] | None = None,
-    travel_month: int | None = None,
+    interests: str = "",
+    travel_month: int = 0,
 ) -> dict:
     """
     Get detailed destination information for whale-watching travel planning.
@@ -129,12 +129,13 @@ def get_destination_info(
     result = dict(match)
     result["destination"] = destination
 
-    if travel_month:
+    if travel_month and travel_month > 0:
         result["whale_season_active"] = travel_month in match["best_whale_months"]
 
     if interests:
         scores: dict[str, int] = {}
-        for interest in interests:
+        for interest in interests.split(","):
+            interest = interest.strip()
             if "hik" in interest.lower():
                 scores["hiking_suitability"] = 10 if match["hiking"] else 3
             if "photo" in interest.lower():
@@ -149,9 +150,9 @@ def get_destination_info(
 
 
 def compare_destinations(
-    destinations: list[str],
-    month: int | None = None,
-    budget_usd: float | None = None,
+    destinations: str,
+    month: int = 0,
+    budget_usd: float = 0,
 ) -> dict:
     """
     Compare multiple whale-watching destinations.
@@ -165,10 +166,11 @@ def compare_destinations(
         dict with comparison table.
     """
     comparison = []
-    for dest in destinations:
+    for dest in destinations.split(","):
+        dest = dest.strip()
         info = get_destination_info(dest, travel_month=month)
         if info.get("found") is not False:
-            if budget_usd:
+            if budget_usd and budget_usd > 0:
                 mid_budget = info.get("avg_daily_budget_usd", {}).get("mid", 999)
                 info["within_budget"] = mid_budget <= budget_usd
             comparison.append(info)

@@ -73,16 +73,10 @@ class MockHotelProvider:
 
 
 def _get_flight_provider() -> FlightProvider:
-    if os.environ.get("GOOGLE_FLIGHTS_API_KEY"):
-        raise NotImplementedError("Google Flights adapter — implement in travel_tools.py")
-    if os.environ.get("EXPEDIA_API_KEY"):
-        raise NotImplementedError("Expedia adapter — implement in travel_tools.py")
     return MockFlightProvider()
 
 
 def _get_hotel_provider() -> HotelProvider:
-    if os.environ.get("BOOKING_COM_API_KEY"):
-        raise NotImplementedError("Booking.com adapter — implement in travel_tools.py")
     return MockHotelProvider()
 
 
@@ -93,7 +87,7 @@ def search_flights(
     destination_region: str,
     departure_month: str,
     trip_duration_days: int = 7,
-    budget_usd: float | None = None,
+    budget_usd: float = 0,
 ) -> dict:
     """
     Search for flights to a whale-watching destination.
@@ -112,7 +106,7 @@ def search_flights(
     return_date = f"{departure_month} +{trip_duration_days} days"
     flights = provider.search_flights(origin_city, destination_region, departure_month, return_date)
 
-    if budget_usd:
+    if budget_usd and budget_usd > 0:
         flights = [f for f in flights if f["price_usd"] <= budget_usd]
 
     return {
@@ -127,7 +121,7 @@ def search_hotels(
     check_in_month: str,
     nights: int = 5,
     guests: int = 2,
-    budget_per_night_usd: float | None = None,
+    budget_per_night_usd: float = 0,
 ) -> dict:
     """
     Search for hotels near a whale-watching destination.
@@ -145,7 +139,7 @@ def search_hotels(
     provider = _get_hotel_provider()
     hotels = provider.search_hotels(destination, check_in_month, f"+{nights} nights", guests)
 
-    if budget_per_night_usd:
+    if budget_per_night_usd and budget_per_night_usd > 0:
         hotels = [h for h in hotels if h["price_per_night_usd"] <= budget_per_night_usd]
 
     for h in hotels:

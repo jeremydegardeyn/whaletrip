@@ -54,12 +54,12 @@ _TOUR_OPERATORS = [
 
 
 def find_whale_watching_tours(
-    region: str | None = None,
-    species: str | None = None,
-    month: int | None = None,
-    family_friendly: bool | None = None,
-    max_price_usd: float | None = None,
-    ocean_basin: str | None = None,
+    region: str = "",
+    species: str = "",
+    month: int = 0,
+    family_friendly: bool = False,
+    max_price_usd: float = 0,
+    ocean_basin: str = "",
 ) -> dict:
     """
     Find whale-watching tours matching the traveller's requirements.
@@ -83,11 +83,11 @@ def find_whale_watching_tours(
         results = [t for t in results if ocean_basin.lower() in t["ocean_basin"].lower()]
     if species:
         results = [t for t in results if any(species.lower() in s.lower() for s in t["species"])]
-    if month:
+    if month and month > 0:
         results = [t for t in results if month in t["season_months"]]
-    if family_friendly is not None:
-        results = [t for t in results if t["family_friendly"] == family_friendly]
-    if max_price_usd:
+    if family_friendly:
+        results = [t for t in results if t["family_friendly"]]
+    if max_price_usd and max_price_usd > 0:
         results = [t for t in results if t["price_usd"] <= max_price_usd]
 
     results.sort(key=lambda x: x["rating"], reverse=True)

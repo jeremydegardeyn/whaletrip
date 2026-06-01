@@ -17,10 +17,10 @@ def _client() -> bigquery.Client:
 
 
 def query_whale_sightings(
-    species: str | None = None,
-    month: int | None = None,
-    ocean_basin: str | None = None,
-    climate_zone: str | None = None,
+    species: str = "",
+    month: int = 0,
+    ocean_basin: str = "",
+    climate_zone: str = "",
     limit: int = 20,
 ) -> dict:
     """
@@ -43,7 +43,7 @@ def query_whale_sightings(
     if species:
         conditions.append("LOWER(species) LIKE LOWER(@species)")
         params.append(ScalarQueryParameter("species", "STRING", f"%{species}%"))
-    if month:
+    if month and month > 0:
         conditions.append("month = @month")
         params.append(ScalarQueryParameter("month", "INT64", month))
     if ocean_basin:
@@ -125,8 +125,8 @@ def get_species_seasonal_pattern(species: str) -> dict:
 
 
 def get_top_whale_destinations(
-    month: int | None = None,
-    species: str | None = None,
+    month: int = 0,
+    species: str = "",
     limit: int = 10,
 ) -> dict:
     """
@@ -143,7 +143,7 @@ def get_top_whale_destinations(
     conditions = []
     params = []
 
-    if month:
+    if month and month > 0:
         conditions.append("month = @month")
         params.append(ScalarQueryParameter("month", "INT64", month))
     if species:
