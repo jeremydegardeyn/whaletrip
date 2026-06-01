@@ -13,16 +13,13 @@ SELECT
   CAST(decimallatitude AS FLOAT64)                                   AS latitude,
   CAST(decimallongitude AS FLOAT64)                                  AS longitude,
 
-  -- Robust date parsing — GBIF eventdate is inconsistently formatted
   SAFE.PARSE_DATE('%Y-%m-%d', SUBSTR(SAFE_CAST(eventdate AS STRING), 1, 10)) AS observation_date,
-  SAFE_CAST(SUBSTR(SAFE_CAST(eventdate AS STRING), 1, 4) AS INT64)   AS year,
-  SAFE_CAST(
-    SUBSTR(SAFE_CAST(eventdate AS STRING), 6, 2) AS INT64
-  )                                                                   AS month,
+  year,
+  month,
 
   countrycode                                                         AS country_code,
   COALESCE(stateprovince, countrycode)                               AS region,
-  datasetname                                                         AS observation_source,
+  datasetkey                                                          AS observation_source,
   COALESCE(SAFE_CAST(individualcount AS INT64), 1)                   AS individual_count,
   occurrencestatus                                                    AS status,
 
@@ -44,11 +41,10 @@ SELECT
     ELSE                                                               'Unknown'
   END AS ocean_basin,
 
-  -- Season derived from month (Northern Hemisphere convention)
   CASE
-    WHEN SAFE_CAST(SUBSTR(SAFE_CAST(eventdate AS STRING), 6, 2) AS INT64) IN (12, 1, 2) THEN 'Winter'
-    WHEN SAFE_CAST(SUBSTR(SAFE_CAST(eventdate AS STRING), 6, 2) AS INT64) IN (3, 4, 5)  THEN 'Spring'
-    WHEN SAFE_CAST(SUBSTR(SAFE_CAST(eventdate AS STRING), 6, 2) AS INT64) IN (6, 7, 8)  THEN 'Summer'
+    WHEN month IN (12, 1, 2) THEN 'Winter'
+    WHEN month IN (3, 4, 5)  THEN 'Spring'
+    WHEN month IN (6, 7, 8)  THEN 'Summer'
     ELSE 'Autumn'
   END AS season
 
