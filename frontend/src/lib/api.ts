@@ -28,7 +28,7 @@ function buildQuery(params: Record<string, unknown>): string {
 export async function fetchSightings(
   filter: SightingsFilter & { limit?: number }
 ): Promise<{ sightings: WhaleSighting[]; total: number }> {
-  return apiFetch(`/sightings${buildQuery(filter)}`);
+  return apiFetch(`/sightings${buildQuery(filter as Record<string, unknown>)}`);
 }
 
 export async function fetchHeatmap(

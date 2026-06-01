@@ -145,7 +145,7 @@ export function WhaleMap({
         controller
         layers={layers}
         onViewStateChange={({ viewState: vs }) => setViewState(vs as typeof INITIAL_VIEW)}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: '0' }}
       >
         <Map
           mapStyle={CARTO_DARK_TILES}
