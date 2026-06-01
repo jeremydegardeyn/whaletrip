@@ -71,7 +71,7 @@ steps:
       - update-traffic
       - whaletrip-agents
       - --region=${_REGION}
-      - --to-tags=candidate=100
+      - --to-latest
     waitFor: ['deploy-agents']
 
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -82,7 +82,7 @@ steps:
       - update-traffic
       - whaletrip-api
       - --region=${_REGION}
-      - --to-tags=candidate=100
+      - --to-latest
     waitFor: ['deploy-api']
 
 
