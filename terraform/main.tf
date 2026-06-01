@@ -137,7 +137,7 @@ resource "google_cloud_run_v2_service" "api" {
       }
       env {
         name  = "AGENTS_URL"
-        value = "https://whaletrip-agents-${var.region}-run.app"  # set after agents deploy
+        value = "https://whaletrip-agents-fdkbl4wtua-uc.a.run.app"
       }
       env {
         name  = "ALLOWED_ORIGINS"

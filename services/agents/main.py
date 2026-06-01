@@ -124,14 +124,13 @@ async def chat(req: ChatRequest):
     session_id = req.session_id or str(uuid.uuid4())
 
     try:
-        # Get or create session
-        try:
-            session = await session_service.get_session(
-                app_name="whaletrip",
-                user_id=req.user_id,
-                session_id=session_id,
-            )
-        except Exception:
+        # Get or create session (ADK 1.x returns None if not found, no exception)
+        session = await session_service.get_session(
+            app_name="whaletrip",
+            user_id=req.user_id,
+            session_id=session_id,
+        )
+        if session is None:
             session = await session_service.create_session(
                 app_name="whaletrip",
                 user_id=req.user_id,
