@@ -1,5 +1,6 @@
 """Destination Agent — nearby attractions, restaurants, activities, suitability."""
 from google.adk.agents import LlmAgent
+from agents.config import AGENT_MODEL
 
 from agents.tools.destination_tools import get_destination_info, compare_destinations
 
@@ -36,7 +37,7 @@ Always offer: "Would you like a full day-by-day itinerary for your trip?"
 
 destination_agent = LlmAgent(
     name="destination_agent",
-    model="gemini-2.0-flash",
+    model=AGENT_MODEL,
     description=(
         "Destination expert covering attractions, activities, cuisine, and itinerary planning "
         "for whale-watching travel destinations worldwide."

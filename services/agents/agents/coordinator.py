@@ -7,6 +7,7 @@ specialised sub-agents using ADK's agent-as-tool pattern.
 from google.adk.agents import LlmAgent
 from google.adk.tools.agent_tool import AgentTool
 
+from agents.config import COORDINATOR_MODEL
 from agents.whale_intelligence import whale_intelligence_agent
 from agents.travel_planner import travel_planner_agent
 from agents.tour_recommendation import tour_recommendation_agent
@@ -111,7 +112,7 @@ Start the conversation warmly and ask what kind of whale-watching experience the
 
 coordinator_agent = LlmAgent(
     name="coordinator_agent",
-    model="gemini-2.5-flash-preview-05-20",
+    model=COORDINATOR_MODEL,
     description="WhaleTrip Coordinator — routes whale and travel questions to specialist agents.",
     instruction=INSTRUCTION,
     tools=[

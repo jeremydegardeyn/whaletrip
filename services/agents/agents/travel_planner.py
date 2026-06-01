@@ -1,5 +1,6 @@
 """Travel Planner Agent — flights, hotels, transfers, budget estimation."""
 from google.adk.agents import LlmAgent
+from agents.config import AGENT_MODEL
 
 from agents.tools.travel_tools import search_flights, search_hotels, estimate_trip_budget
 
@@ -37,7 +38,7 @@ Always confirm: origin city, travel month, group size, trip duration before fina
 
 travel_planner_agent = LlmAgent(
     name="travel_planner_agent",
-    model="gemini-2.0-flash",
+    model=AGENT_MODEL,
     description=(
         "Travel planner specialising in whale-watching trips. Handles flights, hotels, "
         "budget estimates, and practical travel logistics."

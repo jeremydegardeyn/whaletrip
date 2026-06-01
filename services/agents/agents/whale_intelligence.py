@@ -1,5 +1,6 @@
 """Whale Intelligence Agent — species knowledge, migration patterns, NOAA/GBIF data analysis."""
 from google.adk.agents import LlmAgent
+from agents.config import AGENT_MODEL
 
 from agents.tools.bigquery_tools import (
     query_whale_sightings,
@@ -40,7 +41,7 @@ Always end answers with: "Would you like me to check flight or hotel options for
 
 whale_intelligence_agent = LlmAgent(
     name="whale_intelligence_agent",
-    model="gemini-2.0-flash",
+    model=AGENT_MODEL,
     description=(
         "Expert cetologist. Handles all questions about whale species, migration patterns, "
         "best observation times and locations, and GBIF/NOAA sighting data analysis."

@@ -1,5 +1,6 @@
 """Tour Recommendation Agent — whale-watching operators, rankings, seasonal suitability."""
 from google.adk.agents import LlmAgent
+from agents.config import AGENT_MODEL
 
 from agents.tools.tour_tools import find_whale_watching_tours, get_tour_details
 
@@ -40,7 +41,7 @@ if not already known.
 
 tour_recommendation_agent = LlmAgent(
     name="tour_recommendation_agent",
-    model="gemini-2.0-flash",
+    model=AGENT_MODEL,
     description=(
         "Whale-watching tour specialist. Finds and ranks operators by destination, "
         "species, season, price, and family suitability."
