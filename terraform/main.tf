@@ -213,7 +213,6 @@ resource "google_firestore_database" "default" {
 
   lifecycle {
     prevent_destroy = true
-    # If database already exists, import it:
-    # terraform import google_firestore_database.default YOUR_PROJECT_ID/(default)
+    ignore_changes  = [location_id, type, concurrency_mode, app_engine_integration_mode]
   }
 }
