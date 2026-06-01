@@ -36,17 +36,92 @@ logger = structlog.get_logger()
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     gcp_project_id: str = ""
+    gcp_region: str = "us-central1"
     allowed_origins: str = "http://localhost:8000,http://localhost:3000"
+    model_armor_template: str = "whaletrip-guardrails"
     port: int = 8001
 
     @property
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
 
+    @property
+    def armor_template_name(self) -> str | None:
+        if not self.gcp_project_id:
+            return None
+        return (
+            f"projects/{self.gcp_project_id}/locations/{self.gcp_region}"
+            f"/templates/{self.model_armor_template}"
+        )
+
 
 settings = Settings()
 
-# Session service — swap for FirestoreSessionService in production for persistence
+# ── Model Armor client (optional — disabled if no project set) ─────────────────
+_armor_client = None
+
+def _get_armor_client():
+    global _armor_client
+    if _armor_client is None and settings.gcp_project_id:
+        try:
+            from google.cloud import modelarmor_v1
+            from google.api_core.client_options import ClientOptions
+            _armor_client = modelarmor_v1.ModelArmorClient(
+                client_options=ClientOptions(
+                    api_endpoint=f"modelarmor.{settings.gcp_region}.rep.googleapis.com"
+                )
+            )
+        except Exception as e:
+            logger.warning("model_armor_unavailable", error=str(e))
+    return _armor_client
+
+
+def _check_armor(text: str, screen_type: str) -> str | None:
+    """
+    Run text through Model Armor. Returns a block reason string if the content
+    is flagged, or None if it passes. Fails open (returns None) on any error.
+    """
+    client = _get_armor_client()
+    template = settings.armor_template_name
+    if not client or not template:
+        return None
+
+    try:
+        from google.cloud import modelarmor_v1
+        if screen_type == "prompt":
+            req = modelarmor_v1.SanitizeUserPromptRequest(
+                name=template,
+                user_prompt_data=modelarmor_v1.DataItem(text=text),
+            )
+            result = client.sanitize_user_prompt(request=req)
+            decision = result.sanitization_result.filter_match_state
+        else:
+            req = modelarmor_v1.SanitizeModelResponseRequest(
+                name=template,
+                model_response_data=modelarmor_v1.DataItem(text=text),
+            )
+            result = client.sanitize_model_response(request=req)
+            decision = result.sanitization_result.filter_match_state
+
+        # MATCH_FOUND means it was flagged
+        if decision == modelarmor_v1.FilterMatchState.MATCH_FOUND:
+            matched = result.sanitization_result.filter_results
+            reasons = [k for k, v in matched.items()
+                       if hasattr(v, 'match_state') and
+                       v.match_state == modelarmor_v1.FilterMatchState.MATCH_FOUND]
+            logger.warning(
+                "model_armor_blocked",
+                screen_type=screen_type,
+                reasons=reasons,
+            )
+            return ",".join(reasons) if reasons else "policy_violation"
+    except Exception as e:
+        logger.warning("model_armor_error", error=str(e), screen_type=screen_type)
+
+    return None
+
+
+# ── Session service ────────────────────────────────────────────────────────────
 session_service = InMemorySessionService()
 runner = Runner(
     agent=coordinator_agent,
@@ -63,7 +138,8 @@ async def lifespan(app: FastAPI):
             client.setup_logging()
         except Exception:
             pass
-    logger.info("agent_service_started", model="gemini-1.5-flash-001")
+    armor_status = "enabled" if settings.armor_template_name else "disabled"
+    logger.info("agent_service_started", model_armor=armor_status)
     yield
 
 
@@ -124,7 +200,16 @@ async def chat(req: ChatRequest):
     session_id = req.session_id or str(uuid.uuid4())
 
     try:
-        # Get or create session (ADK 1.x returns None if not found, no exception)
+        # ── Model Armor: screen incoming prompt ────────────────────────────────
+        block_reason = _check_armor(req.message, "prompt")
+        if block_reason:
+            logger.warning("prompt_blocked", session_id=session_id, reason=block_reason)
+            return ChatResponse(
+                session_id=session_id,
+                message="I'm not able to respond to that. Let me know if I can help you plan a whale-watching trip.",
+            )
+
+        # ── Get or create session (ADK 1.x returns None if not found) ──────────
         session = await session_service.get_session(
             app_name="whaletrip",
             user_id=req.user_id,
@@ -153,6 +238,12 @@ async def chat(req: ChatRequest):
                         full_response += part.text
             if hasattr(event, "author"):
                 last_agent = event.author
+
+        # ── Model Armor: screen outgoing response ──────────────────────────────
+        block_reason = _check_armor(full_response, "response")
+        if block_reason:
+            logger.warning("response_blocked", session_id=session_id, reason=block_reason)
+            full_response = "I wasn't able to generate a safe response. Please try rephrasing your question."
 
         clean_text, map_actions, follow_ups = _parse_response(full_response)
         logger.info("chat_response", session_id=session_id, agent=last_agent, chars=len(clean_text))
@@ -185,7 +276,8 @@ async def clear_session(session_id: str, user_id: str = "anonymous"):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "whaletrip-agents"}
+    armor_active = _get_armor_client() is not None
+    return {"status": "ok", "service": "whaletrip-agents", "model_armor": armor_active}
 
 
 if __name__ == "__main__":
