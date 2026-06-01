@@ -19,7 +19,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.types import Content, Part
+from google.genai.types import Content, Part
 
 from agents.coordinator import coordinator_agent
 
