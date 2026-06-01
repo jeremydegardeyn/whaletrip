@@ -94,7 +94,9 @@ resource "google_bigquery_dataset" "whaletrip" {
 # ── Secrets ────────────────────────────────────────────────────────────────────
 resource "google_secret_manager_secret" "api_secret_key" {
   secret_id = "whaletrip-api-secret-key"
-  replication { auto {} }
+  replication {
+    auto {}
+  }
   depends_on = [google_project_service.services]
 }
 
