@@ -40,7 +40,7 @@ Always end answers with: "Would you like me to check flight or hotel options for
 
 whale_intelligence_agent = LlmAgent(
     name="whale_intelligence_agent",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.0-flash",
     description=(
         "Expert cetologist. Handles all questions about whale species, migration patterns, "
         "best observation times and locations, and GBIF/NOAA sighting data analysis."

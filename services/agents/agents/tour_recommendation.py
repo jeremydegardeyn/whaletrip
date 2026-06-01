@@ -40,7 +40,7 @@ if not already known.
 
 tour_recommendation_agent = LlmAgent(
     name="tour_recommendation_agent",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.0-flash",
     description=(
         "Whale-watching tour specialist. Finds and ranks operators by destination, "
         "species, season, price, and family suitability."
