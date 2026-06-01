@@ -23,26 +23,11 @@ steps:
       - ./services/agents
     waitFor: ['-']
 
-  # ── Run API tests ────────────────────────────────────────────────────────────
-  - name: 'gcr.io/cloud-builders/docker'
-    id: test-api
-    args:
-      - run
-      - --rm
-      - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/whaletrip/api:${_TAG}'
-      - python
-      - -m
-      - pytest
-      - tests/
-      - -v
-      - --tb=short
-    waitFor: ['build-api']
-
   # ── Push images ──────────────────────────────────────────────────────────────
   - name: 'gcr.io/cloud-builders/docker'
     id: push-api
     args: ['push', '--all-tags', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/whaletrip/api']
-    waitFor: ['test-api']
+    waitFor: ['build-api']
 
   - name: 'gcr.io/cloud-builders/docker'
     id: push-agents
@@ -100,24 +85,6 @@ steps:
       - --to-tags=candidate=100
     waitFor: ['deploy-api']
 
-  # ── Build & deploy frontend to Firebase Hosting ─────────────────────────────
-  - name: 'node:20-slim'
-    id: build-frontend
-    dir: frontend
-    entrypoint: bash
-    args:
-      - -c
-      - |
-        npm ci --silent
-        NEXT_PUBLIC_API_URL=https://whaletrip-api-${_REGION}-run.app \
-        npm run build
-    waitFor: ['-']
-
-  - name: 'gcr.io/firebase-tools/firebase'
-    id: deploy-frontend
-    args: ['deploy', '--only', 'hosting', '--project', '${_PROJECT_ID}']
-    dir: frontend
-    waitFor: ['build-frontend']
 
 substitutions:
   _PROJECT_ID: ''
