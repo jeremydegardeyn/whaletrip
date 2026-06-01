@@ -59,16 +59,13 @@ def get_sightings(f: SightingsFilter) -> tuple[list[WhaleSighting], int]:
 
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
 
-    # Use TABLESAMPLE for large result sets to stay within BQ free tier
-    sample_clause = "TABLESAMPLE SYSTEM (10 PERCENT)" if not conditions else ""
-
     query = f"""
         SELECT
           sighting_id, species, genus, latitude, longitude,
           observation_date, year, month,
           country_code, region, observation_source,
           individual_count, ocean_basin, climate_zone, season
-        FROM `{settings.bq_sightings_table}` {sample_clause}
+        FROM `{settings.bq_sightings_table}`
         {where}
         ORDER BY observation_date DESC
         LIMIT @limit
@@ -82,7 +79,7 @@ def get_sightings(f: SightingsFilter) -> tuple[list[WhaleSighting], int]:
 
     count_query = f"""
         SELECT COUNT(*) AS total
-        FROM `{settings.bq_sightings_table}` {sample_clause}
+        FROM `{settings.bq_sightings_table}`
         {where}
     """
     count_params = [p for p in params if p.name != "limit"]
