@@ -114,7 +114,8 @@ bigquery-public-data.gbif.occurrences
 | Cloud Run (Agents) | same | ~5K req | $0 |
 | BigQuery | 1TB queries/mo | ~5GB/mo | $0 |
 | Firestore | 50K reads/day | ~1K reads/day | $0 |
-| Vertex AI Gemini 1.5 Flash | None | 100 chats/mo ≈ 50K tokens | ~$0.01 |
+| Vertex AI Gemini 2.5 Flash (coordinator) | None | 100 chats/mo ≈ 50K tokens | ~$0.01 |
+| Vertex AI Gemini 2.0 Flash (sub-agents) | None | included above | ~$0.01 |
 | Firebase Hosting | 10GB transfer | <1GB | $0 |
 | Artifact Registry | 0.5GB | ~0.3GB | $0 |
 | **Total** | | | **~$0.01** |

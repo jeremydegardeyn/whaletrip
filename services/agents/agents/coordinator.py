@@ -65,7 +65,7 @@ Start the conversation warmly and ask what kind of whale-watching experience the
 
 coordinator_agent = LlmAgent(
     name="coordinator_agent",
-    model="gemini-1.5-flash-001",
+    model="gemini-2.5-flash",
     description="WhaleTrip Coordinator — routes whale and travel questions to specialist agents.",
     instruction=INSTRUCTION,
     tools=[

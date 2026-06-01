@@ -37,7 +37,7 @@ Always confirm: origin city, travel month, group size, trip duration before fina
 
 travel_planner_agent = LlmAgent(
     name="travel_planner_agent",
-    model="gemini-1.5-flash-001",
+    model="gemini-2.0-flash-001",
     description=(
         "Travel planner specialising in whale-watching trips. Handles flights, hotels, "
         "budget estimates, and practical travel logistics."

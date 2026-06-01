@@ -36,5 +36,5 @@ variable "allowed_origins" {
 variable "gemini_model" {
   description = "Gemini model ID"
   type        = string
-  default     = "gemini-1.5-flash-001"
+  default     = "gemini-2.0-flash-001"
 }

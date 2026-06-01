@@ -36,7 +36,7 @@ Always offer: "Would you like a full day-by-day itinerary for your trip?"
 
 destination_agent = LlmAgent(
     name="destination_agent",
-    model="gemini-1.5-flash-001",
+    model="gemini-2.0-flash-001",
     description=(
         "Destination expert covering attractions, activities, cuisine, and itinerary planning "
         "for whale-watching travel destinations worldwide."
